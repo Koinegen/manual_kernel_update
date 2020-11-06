@@ -7,7 +7,7 @@ MACHINES = {
               # VM CPU count
               :cpus => 2,
               # VM RAM size (Mb)
-              :memory => 1024,
+              :memory => 2048,
               # networks
               :net => [],
               # forwarded ports
@@ -18,7 +18,7 @@ MACHINES = {
 Vagrant.configure("2") do |config|
   MACHINES.each do |boxname, boxconfig|
     # Disable shared folders
-    config.vm.synced_folder ".", "/vagrant", disabled: true
+    config.vm.synced_folder "./share", "/mnt/hgfs", disabled: false
     # Apply VM config
     config.vm.define boxname do |box|
       # Set VM base box and hostname
@@ -42,6 +42,12 @@ Vagrant.configure("2") do |config|
         v.memory = boxconfig[:memory]
         v.cpus = boxconfig[:cpus]
       end
+    
+      box.vm.provision "shell", inline: <<-SHELL
+          mkdir -p ~root/.ssh
+               cp ~vagrant/.ssh/auth* ~root/.ssh
+          yum install -y net-tools gdisk mc 
+        SHELL
     end
   end
 end
